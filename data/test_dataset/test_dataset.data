@@ -1,0 +1,4 @@
+1.1, 2.2, A, D, OK
+5, 7, B, E, Not OK
+?, 3.3, C, F
+What, The, Fuck, Damn // This should be ignored

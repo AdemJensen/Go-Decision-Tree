@@ -1,0 +1,13 @@
+| This is a test dataset for unit test.
+
+OK, Not OK
+
+Attribute1: continuous.
+
+| This attribute does not end with a period.
+Attribute2: continuous
+
+| This attribute does not end with a period.
+Attribute 3: A, B, C
+
+Attribute 4: D, E, F.
