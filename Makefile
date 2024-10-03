@@ -1,3 +1,10 @@
+all: fmt build
 
 fmt:
-	go fmt ./...
+	goimports -w .
+
+test:
+	go test -v ./...
+
+build:
+	go build -o output/
