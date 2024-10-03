@@ -1,3 +1,7 @@
 {
-  "consider_invalid_data_as_missing": true
+  "consider_invalid_data_as_missing": true,
+  "max_depth": 50,
+  "min_samples_split": 10,
+  "min_samples_leaf": 5,
+  "max_nominal_brute_force_scale": 12
 }
