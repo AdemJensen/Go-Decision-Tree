@@ -101,3 +101,10 @@ func (n NominalValue) IsMissing() bool {
 func (n NominalValue) Value() interface{} {
 	return n.value
 }
+
+func NewNominalValue(attr *NominalAttribute, value string) *NominalValue {
+	return &NominalValue{
+		attr:  attr,
+		value: value,
+	}
+}

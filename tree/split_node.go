@@ -48,7 +48,7 @@ func splitNode(conf *config.Config, level int, node *Node) error {
 			}
 			if len(bestNominalSplit) > 0 && bestNominalGain > bestSplitGain {
 				bestSplitGain = bestNominalGain
-				bestSplitChildren = buildNodeListFromNominalSplit(bestNominalSplit)
+				bestSplitChildren = buildNodeListFromNominalSplit(attribute, bestNominalSplit)
 			}
 		}
 	}

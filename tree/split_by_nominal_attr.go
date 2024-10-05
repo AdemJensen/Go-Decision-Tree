@@ -2,6 +2,7 @@ package tree
 
 import (
 	"DecisionTree/config"
+	"DecisionTree/data"
 	"fmt"
 	"math"
 	"slices"
@@ -242,11 +243,11 @@ func checkNominalSplitMinSamplesLeaf(conf *config.Config, split []*nominalSplitU
 	return true
 }
 
-func buildNodeListFromNominalSplit(split []*nominalSplitUnit) []*Node {
+func buildNodeListFromNominalSplit(attribute data.Attribute, split []*nominalSplitUnit) []*Node {
 	var res []*Node
 	for _, unit := range split {
 		res = append(res, &Node{
-			Condition: newIsOneOfCondition(unit.values),
+			Condition: newIsOneOfCondition(attribute, unit.values),
 			Children:  nil,
 			instances: unit.instances,
 		})

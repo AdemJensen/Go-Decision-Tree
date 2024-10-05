@@ -88,12 +88,14 @@ func splitInstancesByContinuousAttr(_ *config.Config, rootEntropy float64, attrI
 	}
 	return []*Node{
 		{
-			Condition: newLessThanCondition(bestSplitValue),
-			instances: leftInstances,
+			Condition:     newLessThanCondition(instances[0].Instance.AttributeValues[attrIndex].Attribute(), bestSplitValue),
+			instances:     leftInstances,
+			IsPrioritized: len(leftInstances) >= len(rightInstances),
 		},
 		{
-			Condition: newGreaterThanEqCondition(bestSplitValue),
-			instances: rightInstances,
+			Condition:     newGreaterThanEqCondition(instances[0].Instance.AttributeValues[attrIndex].Attribute(), bestSplitValue),
+			instances:     rightInstances,
+			IsPrioritized: len(rightInstances) > len(leftInstances),
 		},
 	}, bestSplitGain, nil
 }

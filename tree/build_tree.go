@@ -37,5 +37,11 @@ func BuildTree(conf *config.Config, valueTable *data.ValueTable) (*Tree, error) 
 		return nil, fmt.Errorf("failed to post prune tree: %w", err)
 	}
 
+	// post process tree
+	err = postProcessTree(conf, tree)
+	if err != nil {
+		return nil, fmt.Errorf("failed to post process tree: %w", err)
+	}
+
 	return tree, nil
 }

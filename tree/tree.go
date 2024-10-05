@@ -30,4 +30,7 @@ type Node struct {
 	Condition Condition
 	Children  []*Node
 	instances []*WeightedInstance // This is only valid during training
+
+	IsPrioritized bool // When facing missing value, prioritize this node
+	LeafClass     string
 }

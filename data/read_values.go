@@ -26,6 +26,15 @@ type Instance struct {
 	ClassValue      *NominalValue
 }
 
+func (i *Instance) GetValueByAttr(attr Attribute) Value {
+	for _, value := range i.AttributeValues {
+		if value.Attribute().Name() == attr.Name() {
+			return value
+		}
+	}
+	return nil
+}
+
 func (i *Instance) String() string {
 	var sb strings.Builder
 	for _, value := range i.AttributeValues {
