@@ -49,7 +49,7 @@ func multiWaySplitByNominalAttr(conf *config.Config, rootEntropy float64, attrIn
 	// calculate gain for this split
 	gain := calculateGainForNominalSplit(rootEntropy, instances, classifyUnits)
 	// distribute missing value instances
-	distributeMissingValuesToNominalValue(classifyUnits, missingValueInstances)
+	distributeMissingValuesToNominalSplit(classifyUnits, missingValueInstances)
 	if !checkNominalSplitMinSamplesLeaf(conf, classifyUnits) {
 		return nil, 0, nil
 	}
@@ -86,7 +86,6 @@ func binarySplitByNominalAttr(conf *config.Config, rootEntropy float64, attrInde
 		bestGain  = 0.0
 		bestSplit []*nominalSplitUnit
 	)
-	// little optimization: calculate frequency count of each attribute value
 
 	// Iterate over all possible splits (represented as bitmasks)
 	for i := 1; i < totalSplits; i++ {
@@ -127,7 +126,7 @@ func binarySplitByNominalAttr(conf *config.Config, rootEntropy float64, attrInde
 		return nil, 0, nil
 	}
 	// distribute missing value instances
-	distributeMissingValuesToNominalValue(bestSplit, missingValueInstances)
+	distributeMissingValuesToNominalSplit(bestSplit, missingValueInstances)
 	return bestSplit, bestGain, nil
 }
 
@@ -214,13 +213,13 @@ func calculateGainForNominalSplit(rootEntropy float64, instances []*WeightedInst
 		totalCount += unit.count
 	}
 	for _, unit := range split {
-		entropy += calculateEntropy(unit.instances, unit.classValueInstanceCount) * unit.count / totalCount
+		entropy += calculateEntropy(unit.instances, unit.count, unit.classValueInstanceCount) * unit.count / totalCount
 	}
 	instanceWeightSum := SumInstanceWeights(instances)
 	return (rootEntropy - entropy) * totalCount / instanceWeightSum
 }
 
-func distributeMissingValuesToNominalValue(split []*nominalSplitUnit, missingValueInstances []*WeightedInstance) {
+func distributeMissingValuesToNominalSplit(split []*nominalSplitUnit, missingValueInstances []*WeightedInstance) {
 	// get the total count of non-missing value instances
 	totalCount := 0.0
 	for _, unit := range split {

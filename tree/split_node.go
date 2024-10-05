@@ -27,7 +27,7 @@ func splitNode(conf *config.Config, level int, node *Node) error {
 	var (
 		bestSplitChildren []*Node // empty node list, means do not split
 		bestSplitGain     = 0.0
-		nodeEntropy       = calculateEntropy(node.instances, nil)
+		nodeEntropy       = calculateEntropy(node.instances, 0, nil)
 	)
 	for i, value := range node.instances[0].Instance.AttributeValues {
 		attribute := value.Attribute()

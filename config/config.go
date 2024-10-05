@@ -20,6 +20,20 @@ type Config struct {
 	MaxNominalBruteForceScale int `json:"max_nominal_brute_force_scale"`
 }
 
+var Conf *Config
+
+func init() {
+	confPath := os.Getenv("CONF_PATH")
+	if confPath == "" {
+		confPath = "config.json"
+	}
+	conf, err := ReadConfig(confPath)
+	if err != nil {
+		panic(fmt.Errorf("failed to read config file: %w", err))
+	}
+	Conf = conf
+}
+
 func ReadConfig(filepath string) (*Config, error) {
 	// read json content from file
 	file, err := os.Open(filepath)
