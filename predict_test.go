@@ -11,8 +11,8 @@ import (
 func TestPredict(t *testing.T) {
 	var (
 		attributesFile = "dataset/adult.names"
-		// trainDataFile  = "dataset/adult.data"
-		testDataFile = "dataset/adult.test"
+		trainDataFile  = "dataset/adult.data"
+		testDataFile   = "dataset/adult.test"
 	)
 	// read data attributes
 	print("Reading dataset...")
@@ -22,12 +22,21 @@ func TestPredict(t *testing.T) {
 		return
 	}
 
-	// read test data
-	testData, err := data.ReadValues(config.Conf, attrTable, testDataFile)
+	// read train data
+	trainData, err := data.ReadValues(config.Conf, attrTable, trainDataFile)
 	if err != nil {
 		log.Fatalf("failed to read training data: %v", err)
 		return
 	}
+	preProcessData(trainData)
+
+	// read test data
+	testData, err := data.ReadValues(config.Conf, attrTable, testDataFile)
+	if err != nil {
+		log.Fatalf("failed to read testing data: %v", err)
+		return
+	}
+	preProcessData(testData)
 	print("OK\n")
 
 	// read tree from file
@@ -39,8 +48,25 @@ func TestPredict(t *testing.T) {
 	}
 	print("OK\n")
 
+	t.Logf("=========================== TRAIN DATASET ===========================")
+
 	// predict all test data, calculate accuracy
-	res, err := tree.TestRun(tr, testData)
+	res, err := tree.TestRun(tr, trainData)
+	if err != nil {
+		t.Fatalf("failed to do test run: %v", err)
+		return
+	}
+	t.Logf("Accuracy: %.2f%%", res.Accuracy*100)
+	t.Logf("Pessimistic error: %.2f%%", res.PessimisticError*100)
+	for class, count := range res.ClassDataCount {
+		t.Logf("Class Data [%s] frequency: %.2f%%", class, float64(count)/float64(len(trainData.Instances))*100)
+		t.Logf("Within class [%s] predict accuracy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
+	}
+
+	t.Logf("=========================== TEST DATASET ===========================")
+
+	// predict all test data, calculate accuracy
+	res, err = tree.TestRun(tr, testData)
 	if err != nil {
 		t.Fatalf("failed to do test run: %v", err)
 		return
@@ -49,6 +75,6 @@ func TestPredict(t *testing.T) {
 	t.Logf("Pessimistic error: %.2f%%", res.PessimisticError*100)
 	for class, count := range res.ClassDataCount {
 		t.Logf("Class Data [%s] frequency: %.2f%%", class, float64(count)/float64(len(testData.Instances))*100)
-		t.Logf("Within class [%s] predict accuricy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
+		t.Logf("Within class [%s] predict accuracy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
 	}
 }
