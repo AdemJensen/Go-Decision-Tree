@@ -1,2 +1,4 @@
 .idea
-output/
+/output/
+/log.txt
+/tree.json
