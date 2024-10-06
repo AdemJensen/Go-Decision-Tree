@@ -4,6 +4,7 @@ import (
 	"DecisionTree/config"
 	"DecisionTree/data"
 	"fmt"
+
 	"github.com/gosuri/uiprogress"
 )
 

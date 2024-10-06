@@ -4,6 +4,7 @@ import (
 	"DecisionTree/config"
 	"DecisionTree/data"
 	"fmt"
+
 	"github.com/gosuri/uiprogress"
 )
 
@@ -19,13 +20,8 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 	reverseMapping := buildReverseMapping(tree.RootNode)
 	// get instances related to each node's prediction
 	instancesMapping := getInstancesRelatedToNodePrediction(tree.RootNode, trainData.Instances)
-	// calculate its original pessimistic error
-	//testResult, _ := TestRun(tree, trainData)
-	//errorCount := testResult.ErrorCount
-	//leafNodes := len(getLeafNodes(tree.RootNode))
 
 	// for each leaf node
-	//var pessimisticError = testResult.PessimisticError
 	for len(pruneReadyNodes) > 0 {
 		targetNode := pruneReadyNodes[0]
 		pruneReadyNodes = pruneReadyNodes[1:]
@@ -49,8 +45,6 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 		if err != nil {
 			return fmt.Errorf("failed to test run node (post): %w", err)
 		}
-		//newPessimisticError := calculatePessimisticError(errorCount-oldInfo.ErrorCount+newInfo.ErrorCount, leafNodes-len(savedChildren)+1, len(trainData.Instances))
-		//if pessimisticError-newPessimisticError < conf.MinPostPruneGeneralizationErrorDecrease {
 		if -(newInfo.PessimisticError - oldInfo.PessimisticError) < conf.MinPostPruneGeneralizationErrorDecrease {
 			// if the error is not decreased, revert the prune
 			targetNode.Children = savedChildren
@@ -60,13 +54,6 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 				pruneReadyNodes = append(pruneReadyNodes, reverseMapping[targetNode.UniqId()])
 				bar.Total++
 			}
-			//config.Logf("[Post-Prune] Pruned node %d, Pessimistic Error: %.6f%% -> %.6f%% (%.6f%%), Error Nodes: %d(%d) -> %d(%d) (%+d), Leaf Nodes: %d -> %d (%+d)",
-			//	targetNode.UniqId(), pessimisticError*100, newPessimisticError*100, (newPessimisticError-pessimisticError)*100,
-			//	errorCount, oldInfo.ErrorCount, errorCount-oldInfo.ErrorCount+newInfo.ErrorCount, newInfo.ErrorCount, (errorCount-oldInfo.ErrorCount+newInfo.ErrorCount)-errorCount,
-			//	leafNodes, leafNodes-len(savedChildren)+1, (leafNodes-len(savedChildren)+1)-leafNodes)
-			//pessimisticError = newPessimisticError
-			//errorCount = errorCount - oldInfo.ErrorCount + newInfo.ErrorCount
-			//leafNodes = leafNodes - len(savedChildren) + 1
 			config.Logf("[Post-Prune] Pruned node %d, Pessimistic Error: %.6f%% -> %.6f%% (%.6f%%), Error Nodes: %d -> %d (%+d), Leaf Nodes: %d -> %d (%+d)",
 				targetNode.UniqId(), oldInfo.PessimisticError*100, newInfo.PessimisticError*100, (newInfo.PessimisticError-oldInfo.PessimisticError)*100,
 				oldInfo.ErrorCount, newInfo.ErrorCount, newInfo.ErrorCount-oldInfo.ErrorCount,
