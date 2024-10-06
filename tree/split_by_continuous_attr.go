@@ -26,6 +26,7 @@ func splitInstancesByContinuousAttr(_ *config.Config, rootEntropy float64, attrI
 		classValueCount[classValue] += instance.Weight
 		nonMissingInstanceCount += instance.Weight
 	}
+	instanceCount := nonMissingInstanceCount + missingInstanceCount
 
 	if len(nonMissingInstances) < 2 {
 		return nil, 0, nil
@@ -62,9 +63,9 @@ func splitInstancesByContinuousAttr(_ *config.Config, rootEntropy float64, attrI
 		// calculate gain for split
 		entropyLeft := calculateEntropy(instances[:i], leftInstanceCount, leftClassCnt)
 		entropyRight := calculateEntropy(instances[i:], rightInstanceCount, rightClassCnt)
-		entropy := (entropyLeft*float64(i) + entropyRight*float64(len(instances)-i)) / float64(len(instances))
+		entropy := (entropyLeft*leftInstanceCount + entropyRight*rightInstanceCount) / instanceCount
 
-		gain := (rootEntropy - entropy) * float64(len(nonMissingInstances)) / float64(len(instances))
+		gain := (rootEntropy - entropy) * nonMissingInstanceCount / instanceCount
 		if gain > bestSplitGain {
 			bestSplitGain = gain
 			bestSplitValue = (v1 + v2) / 2
@@ -90,12 +91,12 @@ func splitInstancesByContinuousAttr(_ *config.Config, rootEntropy float64, attrI
 		{
 			Condition:     newLessThanCondition(instances[0].Instance.AttributeValues[attrIndex].Attribute(), bestSplitValue),
 			instances:     leftInstances,
-			IsPrioritized: len(leftInstances) >= len(rightInstances),
+			IsPrioritized: leftInstanceCount >= rightInstanceCount,
 		},
 		{
 			Condition:     newGreaterThanEqCondition(instances[0].Instance.AttributeValues[attrIndex].Attribute(), bestSplitValue),
 			instances:     rightInstances,
-			IsPrioritized: len(rightInstances) > len(leftInstances),
+			IsPrioritized: rightInstanceCount > leftInstanceCount,
 		},
 	}, bestSplitGain, nil
 }

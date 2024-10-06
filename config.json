@@ -1,7 +1,10 @@
 {
   "consider_invalid_data_as_missing": true,
   "max_depth": 50,
-  "min_samples_split": 10,
-  "min_samples_leaf": 5,
-  "max_nominal_brute_force_scale": 12
+  "min_samples_split": 20,
+  "min_samples_leaf": 10,
+  "min_impurity_decrease": 0.05,
+  "max_nominal_brute_force_scale": 16,
+  "verbose_log": true,
+  "log_file": "log.txt"
 }

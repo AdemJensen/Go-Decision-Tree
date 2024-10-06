@@ -28,6 +28,12 @@ func postProcessNode(_ *config.Config, node *Node) error {
 			}
 		}
 		node.LeafClass = maxFrequencyClass
+	} else {
+		for _, child := range node.Children {
+			if err := postProcessNode(nil, child); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

@@ -1,12 +1,16 @@
 package tree
 
-import "DecisionTree/data"
+import (
+	"DecisionTree/data"
+	"fmt"
+	"strings"
+)
 
 type ConditionType string
 
 const (
-	LessThan      ConditionType = "<"         // continuous
-	GreaterThanEq ConditionType = ">="        // continuous
+	LessThan      ConditionType = "lt"        // continuous
+	GreaterThanEq ConditionType = "ge"        // continuous
 	Range         ConditionType = "range"     // continuous, min < value <= max
 	IsOneOf       ConditionType = "is_one_of" // Nominal
 )
@@ -15,6 +19,7 @@ type Condition interface {
 	Type() ConditionType
 	Attr() data.Attribute
 	IsMet(value data.Value) bool
+	Log() string
 }
 
 type ContinuousCondition struct {
@@ -62,6 +67,19 @@ func (c *ContinuousCondition) IsMet(value data.Value) bool {
 	}
 }
 
+func (c *ContinuousCondition) Log() string {
+	switch c.conditionType {
+	case LessThan:
+		return c.attr.Name() + " < " + fmt.Sprintf("%.2f", c.upperValue)
+	case GreaterThanEq:
+		return c.attr.Name() + " >= " + fmt.Sprintf("%.2f", c.lowerValue)
+	case Range:
+		return fmt.Sprintf("%.2f", c.lowerValue) + " < " + c.attr.Name() + " <= " + fmt.Sprintf("%.2f", c.upperValue)
+	default:
+		return "INVALID COND"
+	}
+}
+
 type NominalCondition struct {
 	conditionType  ConditionType
 	attr           data.Attribute
@@ -92,4 +110,8 @@ func (n *NominalCondition) IsMet(value data.Value) bool {
 		}
 	}
 	return false
+}
+
+func (n *NominalCondition) Log() string {
+	return n.attr.Name() + " in " + fmt.Sprintf("['%s']", strings.Join(n.acceptedValues, "', '"))
 }

@@ -28,6 +28,9 @@ func calculateEntropy(instances []*WeightedInstance, allInstanceCount float64, f
 	entropy := 0.0
 	for _, value := range classValues {
 		frequency := fastClassFrequencyCnt[value] / allInstanceCount
+		if frequency == 0 {
+			continue
+		}
 		entropy -= frequency * math.Log2(frequency)
 	}
 	return entropy

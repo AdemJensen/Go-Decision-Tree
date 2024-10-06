@@ -11,7 +11,7 @@ func main() {
 	var (
 		attributesFile = "dataset/adult.names"
 		trainDataFile  = "dataset/adult.data"
-		// testDataFile   = "data/adult.test"
+		// testDataFile   = "dataset/adult.test"
 	)
 	// read data attributes
 	print("Reading dataset...")

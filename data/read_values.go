@@ -85,10 +85,15 @@ func ReadValues(conf *config.Config, attrTable *AttributeTable, filepath string)
 }
 
 func handleInstanceLine(conf *config.Config, attrTable *AttributeTable, line string) (*Instance, error) {
-	line = strings.TrimSpace(line) // Remove leading and trailing spaces
+	line = strings.TrimSpace(line)      // Remove leading and trailing spaces
+	line = strings.TrimRight(line, ".") // Remove trailing period
 
 	// Ignore empty lines
 	if len(line) == 0 {
+		return nil, nil
+	}
+	// Ignore comment lines
+	if len(line) == 0 || strings.HasPrefix(line, "|") {
 		return nil, nil
 	}
 

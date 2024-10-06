@@ -1,6 +1,9 @@
 package tree
 
-import "DecisionTree/data"
+import (
+	"DecisionTree/data"
+	"strings"
+)
 
 type Tree struct {
 	Attributes []data.Attribute
@@ -38,4 +41,25 @@ type Node struct {
 
 	IsPrioritized bool // When facing missing value, prioritize this node
 	LeafClass     string
+
+	uniqId int
+}
+
+var globalUniqId = 0
+
+func (n *Node) UniqId() int {
+	if n.uniqId == 0 {
+		globalUniqId++
+		n.uniqId = globalUniqId
+	}
+	return n.uniqId
+}
+
+func (n *Node) LogChildConditions() string {
+	var conditions []string
+	for _, child := range n.Children {
+		conditions = append(conditions, "<"+child.Condition.Log()+">")
+	}
+
+	return "{" + strings.Join(conditions, ", ") + "}"
 }

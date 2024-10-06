@@ -72,6 +72,9 @@ func NewPersistentTree(tree *Tree) *PersistentTree {
 }
 
 func (p *PersistentTree) ToTree() *Tree {
+	if p == nil {
+		return nil
+	}
 	var attrList []data.Attribute
 	for _, attr := range p.Attributes {
 		attrInst, _ := attr.ToAttribute()
@@ -84,15 +87,18 @@ func (p *PersistentTree) ToTree() *Tree {
 }
 
 type PersistentNode struct {
+	UniqId        int `json:"uniq_id"`
 	Condition     *PersistentCondition
 	Children      []*PersistentNode
-	IsPrioritized bool   `json:"is_prioritized"`
-	LeafClass     string `json:"leaf_class"`
+	IsPrioritized bool   `json:"is_prioritized,omitempty"`
+	LeafClass     string `json:"leaf_class,omitempty"`
 }
 
 func NewPersistentNode(attrList []*data.PersistentAttribute, node *Node) *PersistentNode {
 	pNode := &PersistentNode{
+		UniqId:        node.UniqId(),
 		Condition:     NewPersistentCondition(attrList, node.Condition),
+		Children:      nil,
 		IsPrioritized: node.IsPrioritized,
 		LeafClass:     node.LeafClass,
 	}
@@ -103,10 +109,16 @@ func NewPersistentNode(attrList []*data.PersistentAttribute, node *Node) *Persis
 }
 
 func (p *PersistentNode) ToNode(attrList []data.Attribute) *Node {
+	if p == nil {
+		return nil
+	}
 	node := &Node{
 		Condition:     p.Condition.ToCondition(attrList),
+		Children:      nil,
+		instances:     nil,
 		IsPrioritized: p.IsPrioritized,
 		LeafClass:     p.LeafClass,
+		uniqId:        p.UniqId,
 	}
 	for _, child := range p.Children {
 		node.Children = append(node.Children, child.ToNode(attrList))
@@ -117,9 +129,9 @@ func (p *PersistentNode) ToNode(attrList []data.Attribute) *Node {
 type PersistentCondition struct {
 	ConditionType  ConditionType `json:"condition_type"`
 	AttrId         int           `json:"attr_id"`
-	UpperValue     float64       `json:"upper_value"`
-	LowerValue     float64       `json:"lower_value"`
-	AcceptedValues []string      `json:"accepted_values"`
+	UpperValue     float64       `json:"upper_value,omitempty"`
+	LowerValue     float64       `json:"lower_value,omitempty"`
+	AcceptedValues []string      `json:"accepted_values,omitempty"`
 }
 
 func getIdFromAttrList(attrList []*data.PersistentAttribute, attribute data.Attribute) int {
@@ -152,6 +164,9 @@ func NewPersistentCondition(attrList []*data.PersistentAttribute, condition Cond
 }
 
 func (p *PersistentCondition) ToCondition(attrList []data.Attribute) Condition {
+	if p == nil {
+		return nil
+	}
 	switch p.ConditionType {
 	case LessThan:
 		return newLessThanCondition(attrList[p.AttrId], p.UpperValue)

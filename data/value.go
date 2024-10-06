@@ -11,6 +11,7 @@ type Value interface {
 	Attribute() Attribute
 	IsMissing() bool
 	Value() interface{}
+	Log() string
 }
 
 type ContinuousValue struct {
@@ -56,6 +57,13 @@ func (c ContinuousValue) Value() interface{} {
 	return c.value
 }
 
+func (c ContinuousValue) Log() string {
+	if c.isMissing {
+		return "<missing>"
+	}
+	return fmt.Sprintf("%f", c.value)
+}
+
 func newNominalValue(conf *config.Config, attr *NominalAttribute, value string) (Value, error) {
 	value = strings.TrimSpace(value)
 	if value == "?" {
@@ -99,6 +107,13 @@ func (n NominalValue) IsMissing() bool {
 }
 
 func (n NominalValue) Value() interface{} {
+	return n.value
+}
+
+func (n NominalValue) Log() string {
+	if n.isMissing {
+		return "<missing>"
+	}
 	return n.value
 }
 

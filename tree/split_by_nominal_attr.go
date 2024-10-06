@@ -3,6 +3,7 @@ package tree
 import (
 	"DecisionTree/config"
 	"DecisionTree/data"
+	"DecisionTree/utils"
 	"fmt"
 	"math"
 	"slices"
@@ -43,10 +44,18 @@ func splitInstancesByNominalAttr(conf *config.Config, rootEntropy float64, attrI
 
 func multiWaySplitByNominalAttr(conf *config.Config, rootEntropy float64, attrIndex int, instances []*WeightedInstance) ([]*nominalSplitUnit, float64, error) {
 	classifiedInstancesMap, missingValueInstances := classifyInstancesByNominalAttr(instances, attrIndex)
-	var classifyUnits []*nominalSplitUnit
+	var (
+		classifyUnits []*nominalSplitUnit
+		attrValues    []string
+	)
 	for value, instanceList := range classifiedInstancesMap {
 		classifyUnits = append(classifyUnits, newNominalValueUnit(value, instanceList))
+		attrValues = append(attrValues, value)
 	}
+	if len(attrValues) < 2 {
+		return nil, 0, nil
+	}
+	//config.Logf("[Nominal-Multi-way] [Attr %d] Attr values: %v", attrIndex, attrValues)
 	// calculate gain for this split
 	gain := calculateGainForNominalSplit(rootEntropy, instances, classifyUnits)
 	// distribute missing value instances
@@ -178,7 +187,7 @@ func joinNominalValueUnit(a, b *nominalSplitUnit) *nominalSplitUnit {
 	}
 
 	res := &nominalSplitUnit{
-		values:                  append(a.values, b.values...),
+		values:                  utils.RemoveEmptyStr(append(a.values, b.values...)),
 		instances:               append(a.instances, b.instances...),
 		count:                   a.count + b.count,
 		classValueInstanceCount: make(map[string]float64),
@@ -244,13 +253,24 @@ func checkNominalSplitMinSamplesLeaf(conf *config.Config, split []*nominalSplitU
 }
 
 func buildNodeListFromNominalSplit(attribute data.Attribute, split []*nominalSplitUnit) []*Node {
-	var res []*Node
-	for _, unit := range split {
+	var (
+		res             []*Node
+		prioritizedNode *Node
+		priority        = 0.0
+	)
+	for i, unit := range split {
 		res = append(res, &Node{
 			Condition: newIsOneOfCondition(attribute, unit.values),
 			Children:  nil,
 			instances: unit.instances,
 		})
+		if unit.count > priority {
+			prioritizedNode = res[i]
+			priority = unit.count
+		}
+	}
+	if prioritizedNode != nil {
+		prioritizedNode.IsPrioritized = true
 	}
 	return res
 }
