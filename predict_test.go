@@ -39,35 +39,16 @@ func TestPredict(t *testing.T) {
 	}
 	print("OK\n")
 
-	//_, err = tr.Predict(testData.Instances[89])
-	//if err != nil {
-	//	t.Fatalf("failed to predict: %v", err)
-	//	return
-	//}
-
 	// predict all test data, calculate accuracy
-	var (
-		correctCount      int
-		classDataCount    = make(map[string]int)
-		classCorrectCount = make(map[string]int)
-	)
-	for _, instance := range testData.Instances {
-		classDataCount[instance.ClassValue.Value().(string)]++
-		res, err := tr.Predict(instance)
-		if err != nil {
-			t.Fatalf("failed to predict: %v", err)
-			return
-		}
-		if res == instance.ClassValue.Value().(string) {
-			correctCount++
-			classCorrectCount[res]++
-		}
-		//t.Logf("Completed predict for %d/%d instances", i+1, len(testData.Instances))
+	res, err := tree.TestRun(tr, testData)
+	if err != nil {
+		t.Fatalf("failed to do test run: %v", err)
+		return
 	}
-	accuracy := float64(correctCount) / float64(len(testData.Instances))
-	t.Logf("Accuracy: %.2f%%", accuracy*100)
-	for class, count := range classDataCount {
-		t.Logf("Class Data [%s]: %.2f%%", class, float64(count)/float64(len(testData.Instances))*100)
-		t.Logf("Within Data [%s] Accuricy: %.2f%%", class, float64(classCorrectCount[class])/float64(count)*100)
+	t.Logf("Accuracy: %.2f%%", res.Accuracy*100)
+	t.Logf("Pessimistic error: %.2f%%", res.PessimisticError*100)
+	for class, count := range res.ClassDataCount {
+		t.Logf("Class Data [%s] frequency: %.2f%%", class, float64(count)/float64(len(testData.Instances))*100)
+		t.Logf("Within class [%s] predict accuricy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
 	}
 }

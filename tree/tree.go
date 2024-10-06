@@ -10,6 +10,13 @@ type Tree struct {
 	RootNode   *Node
 }
 
+func (t *Tree) Copy() *Tree {
+	return &Tree{
+		Attributes: t.Attributes,
+		RootNode:   t.RootNode.Copy(),
+	}
+}
+
 func (t *Tree) Marshal(instance *data.Instance) (string, error) {
 	return t.RootNode.Predict(instance)
 }
@@ -62,4 +69,19 @@ func (n *Node) LogChildConditions() string {
 	}
 
 	return "{" + strings.Join(conditions, ", ") + "}"
+}
+
+func (n *Node) Copy() *Node {
+	var children []*Node
+	for _, child := range n.Children {
+		children = append(children, child.Copy())
+	}
+	return &Node{
+		Condition:     n.Condition,
+		Children:      children,
+		instances:     n.instances,
+		IsPrioritized: n.IsPrioritized,
+		LeafClass:     n.LeafClass,
+		uniqId:        n.uniqId,
+	}
 }

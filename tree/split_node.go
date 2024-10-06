@@ -4,9 +4,11 @@ import (
 	"DecisionTree/config"
 	"DecisionTree/data"
 	"fmt"
+	"github.com/gosuri/uiprogress"
 )
 
-func splitNode(conf *config.Config, level int, node *Node) error {
+func splitNode(bar *uiprogress.Bar, conf *config.Config, level int, node *Node) error {
+	defer bar.Incr()
 	node.UniqId() // ensure node has a uniq id
 
 	// if reach max depth, stop split
@@ -27,10 +29,6 @@ func splitNode(conf *config.Config, level int, node *Node) error {
 		return nil
 	}
 
-	if node.UniqId() == 13 {
-		println()
-	}
-
 	// for each attribute, try to split node, find the best split
 	// Initial best split: do not split. Impurity is the impurity of the node
 	var (
@@ -40,9 +38,6 @@ func splitNode(conf *config.Config, level int, node *Node) error {
 		//bestSplitIndex    int
 	)
 	for i, value := range node.instances[0].Instance.AttributeValues {
-		if node.UniqId() == 13 && i == 1 {
-			println()
-		}
 		attribute := value.Attribute()
 		switch attribute.Type() {
 		case data.Continuous:
@@ -81,18 +76,12 @@ func splitNode(conf *config.Config, level int, node *Node) error {
 
 	// split node
 	node.Children = bestSplitChildren
-
-	// DEBUG
-	//if len(node.Children) == 1 {
-	//	println()
-	//	nodeEntropy = calculateEntropy(node.instances, 0, nil)
-	//	_, bestSplitGain, _ = splitInstancesByNominalAttr(conf, nodeEntropy, bestSplitIndex, node.instances)
-	//}
+	bar.Total += len(bestSplitChildren)
 
 	config.Logf("[Train %d] [Level %d] Split node by condition %s, gain=%f, n_instance=%d", node.UniqId(), level, node.LogChildConditions(), bestSplitGain, len(node.instances))
 	for _, child := range bestSplitChildren {
 		// recursively split child node
-		if err := splitNode(conf, level+1, child); err != nil {
+		if err := splitNode(bar, conf, level+1, child); err != nil {
 			return fmt.Errorf("failed to split node: %w", err)
 		}
 	}

@@ -21,6 +21,8 @@ type Config struct {
 	// This value must >= 2.
 	MaxNominalBruteForceScale int `json:"max_nominal_brute_force_scale"`
 
+	MinPostPruneGeneralizationErrorDecrease float64 `json:"min_post_prune_ge_decrease"`
+
 	VerboseLog bool   `json:"verbose_log"`
 	LogFile    string `json:"log_file"`
 }
@@ -46,7 +48,7 @@ func init() {
 
 	// log file
 	if Conf.LogFile != "" {
-		file, err := os.OpenFile(Conf.LogFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		file, err := os.OpenFile(Conf.LogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			panic(fmt.Errorf("failed to open log file: %w", err))
 		}
