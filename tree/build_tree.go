@@ -19,7 +19,17 @@ func BuildTree(conf *config.Config, valueTable *data.ValueTable) (*Tree, error) 
 		})
 	}
 
+	if len(instances) == 0 {
+		return nil, fmt.Errorf("no valid instances")
+	}
+
+	var attributes []data.Attribute
+	for _, attr := range instances[0].Instance.AttributeValues {
+		attributes = append(attributes, attr.Attribute())
+	}
+
 	tree := &Tree{
+		Attributes: attributes,
 		RootNode: &Node{
 			instances: instances,
 		},

@@ -3,7 +3,12 @@ package tree
 import "DecisionTree/data"
 
 type Tree struct {
-	RootNode *Node
+	Attributes []data.Attribute
+	RootNode   *Node
+}
+
+func (t *Tree) Marshal(instance *data.Instance) (string, error) {
+	return t.RootNode.Predict(instance)
 }
 
 type WeightedInstance struct {

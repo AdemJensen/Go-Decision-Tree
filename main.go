@@ -1,25 +1,57 @@
 package main
 
 import (
-	"fmt"
+	"DecisionTree/config"
+	"DecisionTree/data"
+	"DecisionTree/tree"
+	"log"
 )
 
-//TIP To run your code, right-click the code and select <b>Run</b>. Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.
-
 func main() {
-	//TIP Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined or highlighted text
-	// to see how GoLand suggests fixing it.
-	s := "gopher"
-	fmt.Println("Hello and welcome, %s!", s)
-
-	for i := 1; i <= 5; i++ {
-		//TIP You can try debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-		// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>. To start your debugging session,
-		// right-click your code in the editor and select the <b>Debug</b> option.
-		fmt.Println("i =", 100/i)
+	var (
+		attributesFile = "dataset/adult.names"
+		trainDataFile  = "dataset/adult.data"
+		// testDataFile   = "data/adult.test"
+	)
+	// read data attributes
+	print("Reading dataset...")
+	attrTable, err := data.ReadAttributes(attributesFile)
+	if err != nil {
+		log.Fatalf("failed to read attributes: %v", err)
+		return
 	}
-}
 
-//TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.
-// Also, you can try interactive lessons for GoLand by selecting 'Help | Learn IDE Features' from the main menu.
+	// read training data
+	trainData, err := data.ReadValues(config.Conf, attrTable, trainDataFile)
+	if err != nil {
+		log.Fatalf("failed to read training data: %v", err)
+		return
+	}
+	print("OK\n")
+
+	// train decision tree
+	print("Training decision tree...")
+	t, err := tree.BuildTree(config.Conf, trainData)
+	if err != nil {
+		log.Fatalf("failed to build tree: %v", err)
+		return
+	}
+	print("OK\n")
+
+	// save tree to file
+	print("Saving tree...")
+	err = tree.WriteTreeToFile(t, "tree.json")
+	if err != nil {
+		log.Fatalf("failed to save tree: %v", err)
+		return
+	}
+	print("OK\n")
+
+	// predict
+	res, err := t.Predict(trainData.Instances[0])
+	if err != nil {
+		log.Fatalf("failed to predict: %v", err)
+		return
+	}
+	println("Predict result: " + res)
+}
