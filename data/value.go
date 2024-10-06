@@ -116,10 +116,3 @@ func (n NominalValue) Log() string {
 	}
 	return n.value
 }
-
-func NewNominalValue(attr *NominalAttribute, value string) *NominalValue {
-	return &NominalValue{
-		attr:  attr,
-		value: value,
-	}
-}
