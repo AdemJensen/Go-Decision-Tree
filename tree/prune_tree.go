@@ -17,24 +17,41 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 	})
 	// build reverse mapping
 	reverseMapping := buildReverseMapping(tree.RootNode)
+	// get instances related to each node's prediction
+	instancesMapping := getInstancesRelatedToNodePrediction(tree.RootNode, trainData.Instances)
 	// calculate its original pessimistic error
-	testResult, _ := TestRun(tree, trainData)
+	//testResult, _ := TestRun(tree, trainData)
+	//errorCount := testResult.ErrorCount
+	//leafNodes := len(getLeafNodes(tree.RootNode))
 
 	// for each leaf node
+	//var pessimisticError = testResult.PessimisticError
 	for len(pruneReadyNodes) > 0 {
 		targetNode := pruneReadyNodes[0]
 		pruneReadyNodes = pruneReadyNodes[1:]
+
+		// get err count related to this node
+		oldInfo, err := testRunNode(targetNode, instancesMapping[targetNode.UniqId()])
+		if err != nil {
+			return fmt.Errorf("failed to test run node (prior): %w", err)
+		}
+
 		// try how much error will be reduced if we prune this node
 		savedChildren := targetNode.Children
 		targetNode.Children = nil
-		err := postProcessNode(conf, targetNode)
+		err = postProcessNode(conf, targetNode)
 		if err != nil {
 			return fmt.Errorf("failed to post process node: %w", err)
 		}
 
 		// calculate its new pessimistic error
-		newTestResult, _ := TestRun(tree, trainData)
-		if testResult.PessimisticError-newTestResult.PessimisticError < conf.MinPostPruneGeneralizationErrorDecrease {
+		newInfo, err := testRunNode(targetNode, instancesMapping[targetNode.UniqId()])
+		if err != nil {
+			return fmt.Errorf("failed to test run node (post): %w", err)
+		}
+		//newPessimisticError := calculatePessimisticError(errorCount-oldInfo.ErrorCount+newInfo.ErrorCount, leafNodes-len(savedChildren)+1, len(trainData.Instances))
+		//if pessimisticError-newPessimisticError < conf.MinPostPruneGeneralizationErrorDecrease {
+		if -(newInfo.PessimisticError - oldInfo.PessimisticError) < conf.MinPostPruneGeneralizationErrorDecrease {
 			// if the error is not decreased, revert the prune
 			targetNode.Children = savedChildren
 		} else {
@@ -43,8 +60,17 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 				pruneReadyNodes = append(pruneReadyNodes, reverseMapping[targetNode.UniqId()])
 				bar.Total++
 			}
-			config.Logf("[Post-Prune] Pruned node %d (pessimistic error decreased by %.2f)", targetNode.UniqId(), testResult.PessimisticError-newTestResult.PessimisticError)
-			testResult = newTestResult
+			//config.Logf("[Post-Prune] Pruned node %d, Pessimistic Error: %.6f%% -> %.6f%% (%.6f%%), Error Nodes: %d(%d) -> %d(%d) (%+d), Leaf Nodes: %d -> %d (%+d)",
+			//	targetNode.UniqId(), pessimisticError*100, newPessimisticError*100, (newPessimisticError-pessimisticError)*100,
+			//	errorCount, oldInfo.ErrorCount, errorCount-oldInfo.ErrorCount+newInfo.ErrorCount, newInfo.ErrorCount, (errorCount-oldInfo.ErrorCount+newInfo.ErrorCount)-errorCount,
+			//	leafNodes, leafNodes-len(savedChildren)+1, (leafNodes-len(savedChildren)+1)-leafNodes)
+			//pessimisticError = newPessimisticError
+			//errorCount = errorCount - oldInfo.ErrorCount + newInfo.ErrorCount
+			//leafNodes = leafNodes - len(savedChildren) + 1
+			config.Logf("[Post-Prune] Pruned node %d, Pessimistic Error: %.6f%% -> %.6f%% (%.6f%%), Error Nodes: %d -> %d (%+d), Leaf Nodes: %d -> %d (%+d)",
+				targetNode.UniqId(), oldInfo.PessimisticError*100, newInfo.PessimisticError*100, (newInfo.PessimisticError-oldInfo.PessimisticError)*100,
+				oldInfo.ErrorCount, newInfo.ErrorCount, newInfo.ErrorCount-oldInfo.ErrorCount,
+				len(savedChildren), 1, 1-len(savedChildren))
 		}
 		bar.Incr()
 	}
@@ -81,7 +107,7 @@ func getPruneReadyNodes(n *Node) []*Node {
 }
 
 func isNodePruneReady(node *Node) bool {
-	if len(node.Children) == 0 {
+	if node == nil || len(node.Children) == 0 {
 		return false
 	}
 	for _, child := range node.Children {
@@ -98,6 +124,25 @@ func buildReverseMapping(node *Node) map[int]*Node {
 		mapping[child.UniqId()] = node
 		for k, v := range buildReverseMapping(child) {
 			mapping[k] = v
+		}
+	}
+	return mapping
+}
+
+func getInstancesRelatedToNodePrediction(node *Node, instances []*data.Instance) map[int][]*data.Instance {
+	mapping := make(map[int][]*data.Instance)
+	nextLayerMapping := make(map[int][]*data.Instance)
+	for _, instance := range instances {
+		mapping[node.UniqId()] = append(mapping[node.UniqId()], instance)
+		relatedChild := node.GetRelatedChild(instance)
+		if relatedChild != nil {
+			nextLayerMapping[relatedChild.UniqId()] = append(nextLayerMapping[relatedChild.UniqId()], instance)
+		}
+	}
+
+	for _, child := range node.Children {
+		for k, v := range getInstancesRelatedToNodePrediction(child, nextLayerMapping[child.UniqId()]) {
+			mapping[k] = append(mapping[k], v...)
 		}
 	}
 	return mapping

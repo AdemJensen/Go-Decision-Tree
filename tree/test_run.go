@@ -18,6 +18,10 @@ type TestResults struct {
 }
 
 func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
+	return testRunNode(tr.RootNode, dataTable.Instances)
+}
+
+func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 	var (
 		correctCount        int
 		errorCount          int
@@ -26,9 +30,9 @@ func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
 		classErrorCount     = make(map[string]int)
 		withinClassAccuracy = make(map[string]float64)
 	)
-	for i, instance := range dataTable.Instances {
+	for i, instance := range instances {
 		classDataCount[instance.ClassValue.Value().(string)]++
-		res, err := tr.Predict(instance)
+		res, err := node.Predict(instance)
 		if err != nil {
 			return nil, fmt.Errorf("failed to predict instance %d: %w", i, err)
 		}
@@ -40,14 +44,13 @@ func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
 			classErrorCount[instance.ClassValue.Value().(string)]++
 		}
 	}
-	accuracy := float64(correctCount) / float64(len(dataTable.Instances))
+	accuracy := float64(correctCount) / float64(len(instances))
 	for k, v := range classDataCount {
 		withinClassAccuracy[k] = float64(classCorrectCount[k]) / float64(v)
 	}
-	leafNodes := getLeafNodes(tr.RootNode)
-	pessimisticError := (float64(errorCount) + float64(len(leafNodes))*0.5) / float64(len(dataTable.Instances))
+	leafNodes := getLeafNodes(node)
 	return &TestResults{
-		TotalDataCount:      len(dataTable.Instances),
+		TotalDataCount:      len(instances),
 		CorrectCount:        correctCount,
 		ErrorCount:          errorCount,
 		Accuracy:            accuracy,
@@ -55,6 +58,10 @@ func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
 		ClassCorrectCount:   classCorrectCount,
 		ClassErrorCount:     classErrorCount,
 		WithinClassAccuracy: withinClassAccuracy,
-		PessimisticError:    pessimisticError,
+		PessimisticError:    calculatePessimisticError(errorCount, len(leafNodes), len(instances)),
 	}, nil
+}
+
+func calculatePessimisticError(errorCount, leafNodesCount, totalDataCount int) float64 {
+	return (float64(errorCount) + float64(leafNodesCount)*0.5) / float64(totalDataCount)
 }

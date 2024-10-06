@@ -18,6 +18,17 @@ func (n *Node) Predict(instance *data.Instance) (string, error) {
 		return n.LeafClass, nil
 	}
 
+	relatedChild := n.GetRelatedChild(instance)
+	if relatedChild != nil {
+		return relatedChild.Predict(instance)
+	}
+	return "", fmt.Errorf("unknown error, cannot predict instance")
+}
+
+func (n *Node) GetRelatedChild(instance *data.Instance) *Node {
+	if len(n.Children) == 0 {
+		return nil
+	}
 	attr := n.Children[0].Condition.Attr()
 	val := instance.GetValueByAttr(attr)
 
@@ -25,7 +36,7 @@ func (n *Node) Predict(instance *data.Instance) (string, error) {
 		for _, child := range n.Children {
 			if child.Condition.IsMet(val) {
 				config.Logf("[Predict %d] Value %v met condition <%s> to child node %d\n", n.UniqId(), val.Log(), child.Condition.Log(), child.UniqId())
-				return child.Predict(instance)
+				return child
 			}
 		}
 		config.Logf("[Predict %d] Value %v mismatched all child nodes...\n", n.UniqId(), val.Log())
@@ -35,8 +46,9 @@ func (n *Node) Predict(instance *data.Instance) (string, error) {
 	for _, child := range n.Children {
 		if child.IsPrioritized {
 			config.Logf("[Predict %d] Value %v goes along prioritized branch node %d...\n", n.UniqId(), val.Value(), child.UniqId())
-			return child.Predict(instance)
+			return child
 		}
 	}
-	return "", fmt.Errorf("unknown error, cannot predict instance")
+
+	return nil
 }
