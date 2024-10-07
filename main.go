@@ -49,14 +49,6 @@ func main() {
 		return
 	}
 	print("OK\n")
-
-	// predict
-	res, err := t.Predict(trainData.Instances[0])
-	if err != nil {
-		log.Fatalf("failed to predict: %v", err)
-		return
-	}
-	println("Predict result: " + res)
 }
 
 func preProcessData(valueTable *data.ValueTable) {
