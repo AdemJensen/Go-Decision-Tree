@@ -23,10 +23,11 @@ go run main.go
 And run the test using the following command:
 
 ```bash
-go test -run ./ -run TestPredict
+cd tests
+CONF_PATH=../config.json go test -run TestPredict
 ```
 
-Accuracy on this dataset using the best hyper-parameters (dataset has been resampled to balance the class data):
+Accuracy on this dataset using the best hyper parameters (dataset has been resampled to balance the class data):
 
 ```text
 Nodes count: 293
@@ -214,7 +215,8 @@ The hyper parameters are defined in the `config.json` file. You can change the h
 To determine a set of the best hyper parameters, you can use this command:
 
 ```bash
-go test -timeout 48h -run ./ -run TestHyperParams
+cd tests
+CONF_PATH=../config.json go test -timeout 48h -run TestHyperParams
 ```
 
 The best config will be output on the console, copy the best config to the `config.json` file.
