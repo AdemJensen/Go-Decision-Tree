@@ -13,6 +13,15 @@ type AttributeTable struct {
 	Class      *NominalAttribute
 }
 
+func (a *AttributeTable) GetAttrByName(name string) Attribute {
+	for _, attribute := range a.Attributes {
+		if attribute.Name() == name {
+			return attribute
+		}
+	}
+	return nil
+}
+
 // ReadAttributes reads the attributes from the file and returns them.
 // The file follows the format:
 // <attribute name>: continuous.

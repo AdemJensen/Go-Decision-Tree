@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class Tree {
+    +Attributes: []Attribute
+    +RootNode: *Node
+}
+
+class Node {
+    -uniqId: int
+    +Condition: Condition
+    +Children: []*Node
+    +Instances []*WeightedInstance
+    +IsPrioritized: bool
+    +LeafClass: string
+    +UniqId(): int
+    +GetNodeCount(): int
+    +GetLeafNodes(): []*Node
+}
+
+interface Condition {
+    +Type(): ConditionType
+    +Attr(): Attribute
+    +IsMet(value): bool
+}
+
+Tree o-- Node
+Node o-- Condition
+Node o-- Node
+
+class ContinuousCondition {
+    -conditionType: ConditionType
+    -attr: Attribute
+    -upperValue: float64
+    -lowerValue: float64
+    +Type(): ConditionType
+    +Attr(): Attribute
+    +IsMet(value): bool
+}
+
+class NominalCondition {
+    -conditionType: ConditionType
+    -attr: Attribute
+    -acceptedValues: []string
+    +Type(): ConditionType
+    +Attr(): Attribute
+    +IsMet(value): bool
+}
+
+Condition <|-- ContinuousCondition: implements
+Condition <|-- NominalCondition: implements
+
+@enduml

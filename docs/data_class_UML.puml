@@ -1,0 +1,84 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface Attribute {
+    +Name(): string
+    +Type(): AttributeType
+    +Parse(conf, value): string
+}
+
+class ContinuousAttribute {
+    -name: string
+    +Name(): string
+    +Type(): AttributeType
+    +Parse(conf, value): string
+}
+
+class NominalAttribute {
+    -name: string
+    +AcceptedValues: []string
+    +Name(): string
+    +Type(): AttributeType
+    +Parse(conf, value): string
+}
+
+Attribute <|-- ContinuousAttribute: implements
+Attribute <|-- NominalAttribute: implements
+
+interface Value {
+    +Attribute(): Attribute
+    +IsMissing(): bool
+    +Value(): any
+    +Log(): string
+}
+
+class ContinuousValue {
+    -attr: Attribute
+    -isMissing: bool
+    -value: float64
+    +Attribute(): Attribute
+    +IsMissing(): bool
+    +Value(): any
+    +Log(): string
+}
+
+class NominalValue {
+    -attr: Attribute
+    -isMissing: bool
+    -value: string
+    +Attribute(): Attribute
+    +IsMissing(): bool
+    +Value(): any
+    +Log(): string
+}
+
+Value <|-- ContinuousValue: implements
+Value <|-- NominalValue: implements
+
+Value o-- Attribute
+'ContinuousValue o-- Attribute
+'NominalValue o-- Attribute
+
+'class AttributeTable {
+'    +Attributes []Attribute
+'    +Class *NominalAttribute
+'}
+'
+'AttributeTable o-- Attribute
+'AttributeTable o-- NominalAttribute
+
+class Instance {
+    +AttributeValues: []Value
+    +ClassValue: *NominalValue
+}
+
+Instance o-- Value
+Instance o-- NominalValue
+
+'class ValueTable {
+'    +Instances []*Instance
+'}
+'
+'ValueTable o-- Instance
+
+@enduml
