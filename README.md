@@ -79,7 +79,7 @@ A data file should be like this:
 ```text
 | This is a comment
 
-| According to the definition above, the data file should be like this:
+| According to the definition above, the data line (or we call it an "instance") should be like this:
 | Attr1, Attr2, Class.
 1.5, Value1, Class A.
 1.8, Value3, Class B.
@@ -154,7 +154,7 @@ if err != nil {
 
 To read a tree from a json file:
 
-```
+```go
 tr, err := tree.ReadTreeFromFile("tree.json")
 if err != nil {
     log.Fatalf("failed to read tree: %v", err)
@@ -182,7 +182,7 @@ for class, count := range res.ClassDataCount {
 
 The return value is of type `tree.TestResult`, which contains the following fields:
 1. Correct count / error count / accuracy: As the name shows.
-2. PessimisticError: The pessimistic error of the prediction (PessimisticError = $(N_{TrainPredictErr} + 0.5 * N_{leafNodes}) / N_{trainInstances}$).
+2. PessimisticError: The pessimistic error of the prediction ($PessimisticError = (N_{TrainPredictErr} + 0.5 * N_{leafNodes}) / N_{trainInstances}$).
 3. Class value data count: The count of each class value in the test data.
 4. Class correct count / error count / accuracy: The metrics of each class value in the test data.
 
