@@ -26,27 +26,42 @@ And run the test using the following command:
 go test -run ./ -run TestPredict
 ```
 
-Accuracy on this dataset (dataset has been resampled to balance the class data):
+Accuracy on this dataset using the best hyper-parameters (dataset has been resampled to balance the class data):
 
 ```text
+Nodes count: 293
+Leaf Nodes count: 226
+Max depth: 11
 =========================== TRAIN DATASET ===========================
-Accuracy: 80.94%
-Pessimistic error: 20.23%
+Accuracy: 79.27%
+Avg predict time: 1.112µs
+Pessimistic error: 20.97%
 Class [<=50K] data frequency: 51.24%
-Class [<=50K] recall: 73.73%
-Class [<=50K] precision: 87.10%
+Class [<=50K] recall: 71.12%
+Class [<=50K] precision: 85.99%
 Class [>50K] data frequency: 48.76%
-Class [>50K] recall: 88.52%
-Class [>50K] precision: 76.22%
+Class [>50K] recall: 87.82%
+Class [>50K] precision: 74.32%
+Confusion matrix:
+Actual [<=50K] & Predict [>50K]: 7138
+Actual [<=50K] & Predict [<=50K]: 17582
+Actual [>50K] & Predict [>50K]: 20658
+Actual [>50K] & Predict [<=50K]: 2865
 =========================== TEST DATASET ===========================
-Accuracy: 78.08%
-Pessimistic error: 24.26%
+Accuracy: 78.69%
+Avg predict time: 1.072µs
+Pessimistic error: 21.78%
 Class [<=50K] data frequency: 51.87%
-Class [<=50K] recall: 72.80%
-Class [<=50K] precision: 82.86%
+Class [<=50K] recall: 71.27%
+Class [<=50K] precision: 85.23%
 Class [>50K] data frequency: 48.13%
-Class [>50K] recall: 83.78%
-Class [>50K] precision: 74.08%
+Class [>50K] recall: 86.69%
+Class [>50K] precision: 73.68%
+Confusion matrix:
+Actual [<=50K] & Predict [<=50K]: 8862
+Actual [<=50K] & Predict [>50K]: 3573
+Actual [>50K] & Predict [>50K]: 10002
+Actual [>50K] & Predict [<=50K]: 1536
 ```
 
 # Basic Usages
@@ -203,6 +218,8 @@ go test -timeout 48h -run ./ -run TestHyperParams
 ```
 
 The best config will be output on the console, copy the best config to the `config.json` file.
+
+Current `config.json` already contains the best hyper parameters for the dataset. Although the full result of hyper parameter test is not provided here, you can get some critical metrics plot under `docs/*.html` files.
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
