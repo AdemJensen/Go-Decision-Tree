@@ -6,15 +6,17 @@ import (
 )
 
 type TestResults struct {
-	TotalDataCount      int
-	CorrectCount        int
-	ErrorCount          int
-	Accuracy            float64
-	ClassDataCount      map[string]int
-	ClassCorrectCount   map[string]int
-	ClassErrorCount     map[string]int
-	WithinClassAccuracy map[string]float64
-	PessimisticError    float64
+	TotalDataCount    int
+	CorrectCount      int
+	ErrorCount        int
+	Accuracy          float64
+	ClassDataCount    map[string]int
+	ClassPredictCount map[string]int
+	ClassCorrectCount map[string]int
+	ClassErrorCount   map[string]int
+	ClassRecall       map[string]float64
+	ClassPrecision    map[string]float64
+	PessimisticError  float64
 }
 
 func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
@@ -23,12 +25,14 @@ func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
 
 func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 	var (
-		correctCount        int
-		errorCount          int
-		classDataCount      = make(map[string]int)
-		classCorrectCount   = make(map[string]int)
-		classErrorCount     = make(map[string]int)
-		withinClassAccuracy = make(map[string]float64)
+		correctCount      int
+		errorCount        int
+		classDataCount    = make(map[string]int)
+		classPredictCount = make(map[string]int)
+		classCorrectCount = make(map[string]int)
+		classErrorCount   = make(map[string]int)
+		classRecall       = make(map[string]float64)
+		classPrecision    = make(map[string]float64)
 	)
 	for i, instance := range instances {
 		classDataCount[instance.ClassValue.Value().(string)]++
@@ -36,6 +40,7 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to predict instance %d: %w", i, err)
 		}
+		classPredictCount[res]++
 		if res == instance.ClassValue.Value().(string) {
 			correctCount++
 			classCorrectCount[instance.ClassValue.Value().(string)]++
@@ -46,19 +51,22 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 	}
 	accuracy := float64(correctCount) / float64(len(instances))
 	for k, v := range classDataCount {
-		withinClassAccuracy[k] = float64(classCorrectCount[k]) / float64(v)
+		classRecall[k] = float64(classCorrectCount[k]) / float64(v)
+		classPrecision[k] = float64(classCorrectCount[k]) / float64(classPredictCount[k])
 	}
-	leafNodes := getLeafNodes(node)
+	leafNodes := node.GetLeafNodes()
 	return &TestResults{
-		TotalDataCount:      len(instances),
-		CorrectCount:        correctCount,
-		ErrorCount:          errorCount,
-		Accuracy:            accuracy,
-		ClassDataCount:      classDataCount,
-		ClassCorrectCount:   classCorrectCount,
-		ClassErrorCount:     classErrorCount,
-		WithinClassAccuracy: withinClassAccuracy,
-		PessimisticError:    calculatePessimisticError(errorCount, len(leafNodes), len(instances)),
+		TotalDataCount:    len(instances),
+		CorrectCount:      correctCount,
+		ErrorCount:        errorCount,
+		Accuracy:          accuracy,
+		ClassDataCount:    classDataCount,
+		ClassPredictCount: classPredictCount,
+		ClassCorrectCount: classCorrectCount,
+		ClassErrorCount:   classErrorCount,
+		ClassRecall:       classRecall,
+		ClassPrecision:    classPrecision,
+		PessimisticError:  calculatePessimisticError(errorCount, len(leafNodes), len(instances)),
 	}, nil
 }
 

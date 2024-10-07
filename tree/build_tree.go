@@ -9,7 +9,6 @@ import (
 )
 
 func BuildTree(conf *config.Config, valueTable *data.ValueTable) (*Tree, error) {
-	uiprogress.Start()
 	// wash data without class values
 	var instances []*WeightedInstance
 	for _, instance := range valueTable.Instances {
@@ -39,7 +38,7 @@ func BuildTree(conf *config.Config, valueTable *data.ValueTable) (*Tree, error) 
 	}
 
 	// split node
-	bar := uiprogress.AddBar(1).PrependFunc(func(b *uiprogress.Bar) string {
+	bar := config.GetUiProgress().AddBar(1).PrependFunc(func(b *uiprogress.Bar) string {
 		return "Building Nodes"
 	}).AppendFunc(func(b *uiprogress.Bar) string {
 		return fmt.Sprintf("%d/%d", b.Current(), b.Total)

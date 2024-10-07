@@ -17,8 +17,12 @@ func (t *Tree) Copy() *Tree {
 	}
 }
 
-func (t *Tree) Marshal(instance *data.Instance) (string, error) {
-	return t.RootNode.Predict(instance)
+func (t *Tree) GetNodeCount() int {
+	return t.RootNode.GetNodeCount()
+}
+
+func (t *Tree) GetLeafNodes() []*Node {
+	return t.RootNode.GetLeafNodes()
 }
 
 type WeightedInstance struct {
@@ -84,4 +88,23 @@ func (n *Node) Copy() *Node {
 		LeafClass:     n.LeafClass,
 		uniqId:        n.uniqId,
 	}
+}
+
+func (n *Node) GetNodeCount() int {
+	count := 1
+	for _, child := range n.Children {
+		count += child.GetNodeCount()
+	}
+	return count
+}
+
+func (n *Node) GetLeafNodes() []*Node {
+	if len(n.Children) == 0 {
+		return []*Node{n}
+	}
+	var nodes []*Node
+	for _, child := range n.Children {
+		nodes = append(nodes, child.GetLeafNodes()...)
+	}
+	return nodes
 }

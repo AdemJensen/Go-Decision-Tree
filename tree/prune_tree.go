@@ -11,7 +11,7 @@ import (
 func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) error {
 	// Get all prune-ready nodes
 	pruneReadyNodes := getPruneReadyNodes(tree.RootNode)
-	bar := uiprogress.AddBar(len(pruneReadyNodes)).PrependFunc(func(b *uiprogress.Bar) string {
+	bar := config.GetUiProgress().AddBar(len(pruneReadyNodes)).PrependFunc(func(b *uiprogress.Bar) string {
 		return "Post-pruning"
 	}).AppendFunc(func(b *uiprogress.Bar) string {
 		return fmt.Sprintf("%d/%d", b.Current(), b.Total)
@@ -63,17 +63,6 @@ func postPruneTree(conf *config.Config, tree *Tree, trainData *data.ValueTable) 
 	}
 
 	return nil
-}
-
-func getLeafNodes(n *Node) []*Node {
-	if len(n.Children) == 0 {
-		return []*Node{n}
-	}
-	var nodes []*Node
-	for _, child := range n.Children {
-		nodes = append(nodes, getLeafNodes(child)...)
-	}
-	return nodes
 }
 
 // getPruneReadyNodes returns all nodes that are ready to be pruned

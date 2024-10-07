@@ -4,6 +4,7 @@ import (
 	"DecisionTree/config"
 	"DecisionTree/data"
 	"DecisionTree/tree"
+	"fmt"
 	"log"
 	"testing"
 )
@@ -48,7 +49,7 @@ func TestPredict(t *testing.T) {
 	}
 	print("OK\n")
 
-	t.Logf("=========================== TRAIN DATASET ===========================")
+	fmt.Printf("=========================== TRAIN DATASET ===========================\n")
 
 	// predict all test data, calculate accuracy
 	res, err := tree.TestRun(tr, trainData)
@@ -56,14 +57,9 @@ func TestPredict(t *testing.T) {
 		t.Fatalf("failed to do test run: %v", err)
 		return
 	}
-	t.Logf("Accuracy: %.2f%%", res.Accuracy*100)
-	t.Logf("Pessimistic error: %.2f%%", res.PessimisticError*100)
-	for class, count := range res.ClassDataCount {
-		t.Logf("Class Data [%s] frequency: %.2f%%", class, float64(count)/float64(len(trainData.Instances))*100)
-		t.Logf("Within class [%s] predict accuracy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
-	}
+	outputTestResult(res)
 
-	t.Logf("=========================== TEST DATASET ===========================")
+	fmt.Printf("=========================== TEST DATASET ===========================\n")
 
 	// predict all test data, calculate accuracy
 	res, err = tree.TestRun(tr, testData)
@@ -71,10 +67,15 @@ func TestPredict(t *testing.T) {
 		t.Fatalf("failed to do test run: %v", err)
 		return
 	}
-	t.Logf("Accuracy: %.2f%%", res.Accuracy*100)
-	t.Logf("Pessimistic error: %.2f%%", res.PessimisticError*100)
+	outputTestResult(res)
+}
+
+func outputTestResult(res *tree.TestResults) {
+	fmt.Printf("Accuracy: %.2f%%\n", res.Accuracy*100)
+	fmt.Printf("Pessimistic error: %.2f%%\n", res.PessimisticError*100)
 	for class, count := range res.ClassDataCount {
-		t.Logf("Class Data [%s] frequency: %.2f%%", class, float64(count)/float64(len(testData.Instances))*100)
-		t.Logf("Within class [%s] predict accuracy: %.2f%%", class, float64(res.ClassCorrectCount[class])/float64(count)*100)
+		fmt.Printf("Class [%s] data frequency: %.2f%%\n", class, float64(count)/float64(res.TotalDataCount)*100)
+		fmt.Printf("Class [%s] recall: %.2f%%\n", class, res.ClassRecall[class]*100)
+		fmt.Printf("Class [%s] precision: %.2f%%\n", class, res.ClassPrecision[class]*100)
 	}
 }

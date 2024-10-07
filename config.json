@@ -6,6 +6,6 @@
   "min_impurity_decrease": 0.05,
   "max_nominal_brute_force_scale": 16,
   "min_post_prune_ge_decrease": 0,
-  "verbose_log": true,
+  "verbose_log": false,
   "log_file": "log.txt"
 }

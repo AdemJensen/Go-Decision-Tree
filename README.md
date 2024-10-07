@@ -32,17 +32,21 @@ Accuracy on this dataset (dataset has been resampled to balance the class data):
 =========================== TRAIN DATASET ===========================
 Accuracy: 80.94%
 Pessimistic error: 20.23%
-Class Data [<=50K] frequency: 51.24%
-Within class [<=50K] predict accuracy: 73.73%
-Class Data [>50K] frequency: 48.76%
-Within class [>50K] predict accuracy: 88.52%
+Class [<=50K] data frequency: 51.24%
+Class [<=50K] recall: 73.73%
+Class [<=50K] precision: 87.10%
+Class [>50K] data frequency: 48.76%
+Class [>50K] recall: 88.52%
+Class [>50K] precision: 76.22%
 =========================== TEST DATASET ===========================
 Accuracy: 78.08%
 Pessimistic error: 24.26%
-Class Data [<=50K] frequency: 51.87%
-Within class [<=50K] predict accuracy: 72.80%
-Class Data [>50K] frequency: 48.13%
-Within class [>50K] predict accuracy: 83.78%
+Class [<=50K] data frequency: 51.87%
+Class [<=50K] recall: 72.80%
+Class [<=50K] precision: 82.86%
+Class [>50K] data frequency: 48.13%
+Class [>50K] recall: 83.78%
+Class [>50K] precision: 74.08%
 ```
 
 # Basic Usages
@@ -184,7 +188,9 @@ The return value is of type `tree.TestResult`, which contains the following fiel
 1. Correct count / error count / accuracy: As the name shows.
 2. PessimisticError: The pessimistic error of the prediction ($PessimisticError = (N_{TrainPredictErr} + 0.5 * N_{leafNodes}) / N_{trainInstances}$).
 3. Class value data count: The count of each class value in the test data.
-4. Class correct count / error count / accuracy: The metrics of each class value in the test data.
+4. Class correct count / error count / recall / precision: The metrics of each class value in the test data.
+   1. Recall: $Recall = \frac{TP}{TP + FN}$.
+   2. Precision: $Precision = \frac{TP}{TP + FP}$.
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
