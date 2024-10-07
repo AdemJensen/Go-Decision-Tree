@@ -23,7 +23,7 @@ go run main.go
 And run the test using the following command:
 
 ```bash
-go test predict_test.go
+go test -run ./ -run TestPredict
 ```
 
 Accuracy on this dataset (dataset has been resampled to balance the class data):
@@ -191,6 +191,18 @@ The return value is of type `tree.TestResult`, which contains the following fiel
 4. Class correct count / error count / recall / precision: The metrics of each class value in the test data.
    1. Recall: $Recall = \frac{TP}{TP + FN}$.
    2. Precision: $Precision = \frac{TP}{TP + FP}$.
+
+## Hyper Parameters
+
+The hyper parameters are defined in the `config.json` file. You can change the hyper parameters in this file.
+
+To determine a set of the best hyper parameters, you can use this command:
+
+```bash
+go test -timeout 48h -run ./ -run TestHyperParams
+```
+
+The best config will be output on the console, copy the best config to the `config.json` file.
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

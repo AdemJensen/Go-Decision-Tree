@@ -59,7 +59,7 @@ func TestHyperParams(t *testing.T) {
 		bar = uiProgress.AddBar(len(maxDepthList) * len(minSamplesSplitList) * len(minSamplesLeafList) * len(minImpurityDecreaseList) * len(maxNominalBruteForceScaleList) * len(minPostPruneGeneralizationErrorDecreaseList)).PrependFunc(func(b *uiprogress.Bar) string {
 			return "Performing Tests"
 		}).AppendFunc(func(b *uiprogress.Bar) string {
-			return fmt.Sprintf("%d/%d", b.Current(), b.Total)
+			return fmt.Sprintf("%d/%d, %.2f%%, Time Elapsed: %s", b.Current(), b.Total, b.CompletedPercent(), b.TimeElapsedString())
 		})
 		allResults []*HyperParamTestResult
 	)
