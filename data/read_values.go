@@ -21,6 +21,12 @@ func (v *ValueTable) String() string {
 	return sb.String()
 }
 
+func (v *ValueTable) RemoveAttribute(name string) {
+	for _, instance := range v.Instances {
+		instance.RemoveAttribute(name)
+	}
+}
+
 type Instance struct {
 	AttributeValues []Value
 	ClassValue      *NominalValue
@@ -33,6 +39,15 @@ func (i *Instance) GetValueByAttr(attr Attribute) Value {
 		}
 	}
 	return nil
+}
+
+func (i *Instance) RemoveAttribute(name string) {
+	for j, value := range i.AttributeValues {
+		if value.Attribute().Name() == name {
+			i.AttributeValues = append(i.AttributeValues[:j], i.AttributeValues[j+1:]...)
+			break
+		}
+	}
 }
 
 func (i *Instance) String() string {

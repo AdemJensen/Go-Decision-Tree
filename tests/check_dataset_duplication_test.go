@@ -1,4 +1,4 @@
-package main
+package tests
 
 import (
 	"DecisionTree/config"
@@ -14,9 +14,9 @@ func TestCheckDatasetDuplication(t *testing.T) {
 	// If so, we will use education-num and remove education.
 
 	var (
-		attributesFile = "dataset/adult.names"
-		trainDataFile  = "dataset/adult.data"
-		testDataFile   = "dataset/adult.test"
+		attributesFile = "../dataset/adult.names"
+		trainDataFile  = "../dataset/adult.data"
+		testDataFile   = "../dataset/adult.test"
 	)
 	// read data attributes
 	print("Reading dataset...")

@@ -25,6 +25,10 @@ func (t *Tree) GetLeafNodes() []*Node {
 	return t.RootNode.GetLeafNodes()
 }
 
+func (t *Tree) GetMaxDepth() int {
+	return t.RootNode.getMaxDepth(1)
+}
+
 type WeightedInstance struct {
 	Instance *data.Instance
 	Weight   float64 // 0~1, for missing value issues
@@ -107,4 +111,18 @@ func (n *Node) GetLeafNodes() []*Node {
 		nodes = append(nodes, child.GetLeafNodes()...)
 	}
 	return nodes
+}
+
+func (n *Node) getMaxDepth(myDepth int) int {
+	if len(n.Children) == 0 {
+		return myDepth
+	}
+	var maxDepth int
+	for _, child := range n.Children {
+		depth := child.getMaxDepth(myDepth + 1)
+		if depth > maxDepth {
+			maxDepth = depth
+		}
+	}
+	return maxDepth
 }

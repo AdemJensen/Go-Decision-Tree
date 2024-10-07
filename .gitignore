@@ -2,4 +2,4 @@
 /output/
 log.txt
 /tree.json
-/hyper_param_test.json
+/tests/hyper_param_test.json

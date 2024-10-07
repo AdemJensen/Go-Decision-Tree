@@ -3,6 +3,7 @@ package tree
 import (
 	"DecisionTree/data"
 	"fmt"
+	"time"
 )
 
 type TestResults struct {
@@ -16,7 +17,9 @@ type TestResults struct {
 	ClassErrorCount   map[string]int
 	ClassRecall       map[string]float64
 	ClassPrecision    map[string]float64
+	ConfusionMatrix   map[string]map[string]int // actual class -> predicted class -> count
 	PessimisticError  float64
+	AvgPredictTime    time.Duration
 }
 
 func TestRun(tr *Tree, dataTable *data.ValueTable) (*TestResults, error) {
@@ -33,7 +36,10 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 		classErrorCount   = make(map[string]int)
 		classRecall       = make(map[string]float64)
 		classPrecision    = make(map[string]float64)
+		confusionMatrix   = make(map[string]map[string]int)
+		startTime         time.Time
 	)
+	startTime = time.Now()
 	for i, instance := range instances {
 		classDataCount[instance.ClassValue.Value().(string)]++
 		res, err := node.Predict(instance)
@@ -41,6 +47,10 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 			return nil, fmt.Errorf("failed to predict instance %d: %w", i, err)
 		}
 		classPredictCount[res]++
+		if _, ok := confusionMatrix[instance.ClassValue.Value().(string)]; !ok {
+			confusionMatrix[instance.ClassValue.Value().(string)] = make(map[string]int)
+		}
+		confusionMatrix[instance.ClassValue.Value().(string)][res]++
 		if res == instance.ClassValue.Value().(string) {
 			correctCount++
 			classCorrectCount[instance.ClassValue.Value().(string)]++
@@ -55,6 +65,10 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 		classPrecision[k] = float64(classCorrectCount[k]) / float64(classPredictCount[k])
 	}
 	leafNodes := node.GetLeafNodes()
+	var avgPredictTime time.Duration
+	if len(instances) > 0 {
+		avgPredictTime = time.Since(startTime) / time.Duration(len(instances))
+	}
 	return &TestResults{
 		TotalDataCount:    len(instances),
 		CorrectCount:      correctCount,
@@ -66,7 +80,9 @@ func testRunNode(node *Node, instances []*data.Instance) (*TestResults, error) {
 		ClassErrorCount:   classErrorCount,
 		ClassRecall:       classRecall,
 		ClassPrecision:    classPrecision,
+		ConfusionMatrix:   confusionMatrix,
 		PessimisticError:  calculatePessimisticError(errorCount, len(leafNodes), len(instances)),
+		AvgPredictTime:    avgPredictTime,
 	}, nil
 }
 
